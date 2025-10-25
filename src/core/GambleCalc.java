@@ -27,7 +27,6 @@ public class GambleCalc {
 		} else {
 			item = itemDB.getUniqueItemByName(name);
 		}
-		double debug = 0.0;
 		BaseItem b = itemDB.getItemData().baseItems.get(item.getCode());
 		int qlvlExceptional = itemDB.getBaseItemQlvl(b.getVariantString(Quality.EXCEPTIONAL));
 		int qlvlElite = itemDB.getBaseItemQlvl(b.getVariantString(Quality.ELITE));
@@ -43,10 +42,8 @@ public class GambleCalc {
 			} else {
 				upgradeChance = this.calculateUpgradeChanceAtIlvl(qlvlExceptional, qlvlElite, ilvl, item.getQuality());
 			}
-			debug += upgradeChance;
 			sumOfProbs += rarityFactor * upgradeChance * ((rarity == Rarity.UNIQUE) ? 0.0005 : 0.001);
 		}
-		System.out.println("Upgrade chance Ex: " + debug / 10.0);
 		return sumOfProbs / 10.0;
 	}
 
@@ -63,7 +60,7 @@ public class GambleCalc {
 		if (others.size() == 1) {
 			return 1.0;
 		}
-		
+
 		int rarityTotal = 0;
 		for (Item i : others) {
 			if (i.getQlvl() > ilvl) {
@@ -81,10 +78,10 @@ public class GambleCalc {
 		double elite = 0.0;
 
 		if (ilvl >= qlvlExceptional) {
-			exceptional = (ilvl - qlvlExceptional) * 0.009 + 0.01;	
+			exceptional = (ilvl - qlvlExceptional) * 0.009 + 0.01;
 		}
 		if (ilvl >= qlvlElite) {
-			elite = (ilvl - qlvlElite) *  0.0033 + 0.01;	
+			elite = (ilvl - qlvlElite) * 0.0033 + 0.01;
 		}
 		switch (quality) {
 		case ELITE:

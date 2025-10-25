@@ -11,20 +11,25 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 import core.DataBase;
+import core.GambleCalc;
 import core.Item;
+import enums.Rarity;
 import net.miginfocom.swing.MigLayout;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 public class D2GambleCalculatorGUI extends JFrame {
 
 	private static final long serialVersionUID = 4974391899083728435L;
 	private final JRadioButton rbUnique = new JRadioButton("Unique");
 	private final JRadioButton rbSet = new JRadioButton("Set");
-
+	private final GambleCalc calc = new GambleCalc();
 	private final JPanel cardsPanel = new JPanel(new CardLayout());
 	private final JComboBox<Item> cbUnique = new JComboBox<>();
 	private final JComboBox<Item> cbSet = new JComboBox<>();
 
 	private final JLabel lblResult = new JLabel("Select an item to see probability.");
+	private final JSpinner spinnerCharLevel = new JSpinner();
 
 	public D2GambleCalculatorGUI(List<Item> uniqueItems, List<Item> setItems) {
 		super("D2(R) Gamble Probability Calculator");
@@ -37,6 +42,9 @@ public class D2GambleCalculatorGUI extends JFrame {
 		rbUnique.setSelected(true);
 
 		JPanel radioPanel = new JPanel();
+		spinnerCharLevel.setModel(new SpinnerNumberModel(1, 1, 99, 1));
+		spinnerCharLevel.addChangeListener(e -> updateLevel(spinnerCharLevel));
+		radioPanel.add(spinnerCharLevel);
 		radioPanel.add(rbUnique);
 		radioPanel.add(rbSet);
 
@@ -49,15 +57,29 @@ public class D2GambleCalculatorGUI extends JFrame {
 		rbUnique.addActionListener(e -> switchCard("UNIQUE"));
 		rbSet.addActionListener(e -> switchCard("SET"));
 
-		cbUnique.addActionListener(e -> updateResult(cbUnique));
-		cbSet.addActionListener(e -> updateResult(cbSet));
+		cbUnique.addActionListener(e -> updateItem(cbUnique));
+		cbSet.addActionListener(e -> updateItem(cbSet));
 
-		setLayout(new BorderLayout());
-		add(radioPanel, BorderLayout.NORTH);
-		add(cardsPanel, BorderLayout.CENTER);
-		add(lblResult, BorderLayout.SOUTH);
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(radioPanel, BorderLayout.NORTH);
+		getContentPane().add(cardsPanel, BorderLayout.CENTER);
+		getContentPane().add(lblResult, BorderLayout.SOUTH);
 
 		switchCard("UNIQUE");
+	}
+
+	private void updateLevel(JSpinner spinnerCharLevel) {
+		JComboBox<Item> activeBox = (rbUnique.isSelected()) ? cbUnique : cbSet;
+		Item selected = (Item) activeBox.getSelectedItem();
+		if (selected != null) {
+			double chance = calculateGambleChance(selected, (int) spinnerCharLevel.getValue());
+			if (chance == 0.0) {
+				lblResult.setText("Cannot be gambled at this level.");
+			} else {
+				lblResult.setText(String.format("%s chance: 1 in %d (%.5f%%)", selected.toString(),
+						Math.round(1.0 / chance), chance * 100));
+			}	
+		}
 	}
 
 	private void switchCard(String cardName) {
@@ -66,18 +88,22 @@ public class D2GambleCalculatorGUI extends JFrame {
 		lblResult.setText("Select an item to see probability.");
 	}
 
-	private void updateResult(JComboBox<Item> comboBox) {
+	private void updateItem(JComboBox<Item> comboBox) {
 		Item selected = (Item) comboBox.getSelectedItem();
 		if (selected != null) {
-			double chance = calculateGambleChance(selected);
-			lblResult.setText(String.format("%s chance: 1 in %d (%.5f%%)", selected.toString(),
-					Math.round(1.0 / chance), chance * 100));
+			double chance = calculateGambleChance(selected, (int) spinnerCharLevel.getValue());
+			if (chance == 0.0) {
+				lblResult.setText("Cannot be gambled at this level.");
+			} else {
+				lblResult.setText(String.format("%s chance: 1 in %d (%.5f%%)", selected.toString(),
+						Math.round(1.0 / chance), chance * 100));
+			}
 		}
 	}
 
 	// TODO implement
-	private double calculateGambleChance(Item item) {
-		return 0.25;
+	private double calculateGambleChance(Item item, int charLvl) {
+		return calc.calculateChanceToGamble(item.getName(), charLvl, ((rbUnique.isSelected()) ? Rarity.UNIQUE : Rarity.SET));
 	}
 
 	public static void main(String[] args) {

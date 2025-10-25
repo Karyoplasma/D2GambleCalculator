@@ -22,14 +22,14 @@ public class DataBase {
 		uniqueItemByName = new HashMap<String, Item>();
 		for (Set<Item> items : itemData.uniqueItems.values()) {
 			for (Item item : items) {
-				item.fixName();
+				item.fixUniqueName();
 				uniqueItemByName.put(item.getName(), item);
 			}
 		}
 		setItemByName = new HashMap<String, Item>();
 		for (Set<Item> items : itemData.setItems.values()) {
 			for (Item item : items) {
-				item.fixName();
+				item.fixSetName();
 				setItemByName.put(item.getName(), item);
 			}
 		}
