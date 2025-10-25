@@ -1,5 +1,9 @@
 package core;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import enums.Quality;
 import enums.Rarity;
@@ -47,6 +51,32 @@ public class GambleCalc {
 		return sumOfProbs / 10.0;
 	}
 
+	public int[] findOptimalGambleRange(String name, int charLvl, Rarity rarity) {
+		Map<Double, Set<Integer>> results = new HashMap<Double, Set<Integer>>();
+		Item item;
+		if (rarity == Rarity.SET) {
+			item = itemDB.getSetItemByName(name);
+		} else {
+			item = itemDB.getUniqueItemByName(name);
+		}
+		double previous = 0.0;
+		for (int i = item.getQlvl() - 4; i<=99; i++) {
+			double chance = calculateChanceToGamble(name, i, rarity);
+			if (chance < previous) {
+				break;
+			}
+	        results.computeIfAbsent(chance, k -> new HashSet<>()).add(i);
+			previous = chance;
+		}
+		int[] ret = new int[3];
+		ret[0] = Collections.min(results.get(previous));
+		ret[1] = Collections.max(results.get(previous));
+		ret[2] = (int) Math.round(1.0 / previous);
+		System.out.println("DEBUG: " + results.get(previous).toString());
+		return ret;
+		
+	}
+	
 	private double getRarityFactorAtIlvl(Item item, int ilvl) {
 		if (item.getQlvl() > ilvl) {
 			return 0.0;
