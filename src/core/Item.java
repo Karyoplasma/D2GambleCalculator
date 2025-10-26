@@ -1,7 +1,6 @@
 package core;
 
 import java.util.Objects;
-
 import enums.Quality;
 import enums.Rarity;
 
@@ -20,7 +19,7 @@ public class Item implements Comparable<Item> {
 		this.name = name;
 		this.quality = quality;
 	}
-	
+
 	public void fixSetName() {
 		switch (this.name) {
 		case "Spiritual Custodian":
@@ -48,7 +47,7 @@ public class Item implements Comparable<Item> {
 			this.fixedName = name;
 		}
 	}
-	
+
 	public void fixUniqueName() {
 		switch (this.name) {
 		case "Bonesob":
@@ -161,6 +160,7 @@ public class Item implements Comparable<Item> {
 		System.out.printf("Name: %s, qlvl: %d, quality: %s, rare: %d, rarity %s\n", name, qlvl, quality, rare, rarity);
 
 	}
+
 	@Override
 	public int compareTo(Item o) {
 		return fixedName.compareTo(o.fixedName);

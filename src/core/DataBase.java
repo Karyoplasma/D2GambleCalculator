@@ -45,19 +45,19 @@ public class DataBase {
 	public ItemData getItemData() {
 		return itemData;
 	}
-	
+
 	public List<Item> getAllUniqueItems() {
 		List<Item> ret = new ArrayList<Item>(uniqueItemByName.values());
 		Collections.sort(ret);
 		return ret;
 	}
-	
+
 	public List<Item> getAllSetItems() {
 		List<Item> ret = new ArrayList<Item>(setItemByName.values());
 		Collections.sort(ret);
 		return ret;
 	}
-	
+
 	public static DataBase getINSTANCE() {
 		return INSTANCE;
 	}

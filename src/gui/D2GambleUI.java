@@ -1,6 +1,9 @@
 package gui;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
+import java.text.DecimalFormat;
 import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JComboBox;
@@ -9,30 +12,27 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
-
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
-
 import core.DataBase;
 import core.GambleCalc;
 import core.Item;
-import enums.Rarity;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.JButton;
 
 public class D2GambleUI extends JFrame {
 
 	private static final long serialVersionUID = -6398321295889228857L;
+	private static final Color BACKGROUND_COLOR = new Color(240, 240, 240);
+	private static final DecimalFormat DECIMALS = new DecimalFormat("#.#####");
 	private final JRadioButton rbUnique = new JRadioButton("Unique");
 	private final JRadioButton rbSet = new JRadioButton("Set");
 	private final JComboBox<Item> cbUnique = new JComboBox<>();
 	private final JComboBox<Item> cbSet = new JComboBox<>();
 	private final JPanel cardsPanel = new JPanel(new CardLayout());
 	private final JLabel lblOptimal = new JLabel("Optimal level: -");
-	private final JPanel chartContainer = new JPanel(new java.awt.BorderLayout());
+	private final JPanel chartContainer = new JPanel(new BorderLayout());
 	private final JButton btnCalculate = new JButton("Calculate");
 	private final GambleCalc calc = new GambleCalc();
 
@@ -40,15 +40,13 @@ public class D2GambleUI extends JFrame {
 		super("D2 GambleUI");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(700, 500);
-		getContentPane().setLayout(new MigLayout("fill, insets 10", "[grow]", "[][grow][]")); // 3 rows: controls,
-																								// chart, info
+		getContentPane().setLayout(new MigLayout("fill, insets 10", "[grow]", "[][grow][]"));
 
 		ButtonGroup group = new ButtonGroup();
 		group.add(rbUnique);
 		group.add(rbSet);
 		rbUnique.setSelected(true);
 
-		// cards
 		uniqueItems.forEach(cbUnique::addItem);
 		setItems.forEach(cbSet::addItem);
 		cardsPanel.add(cbUnique, "UNIQUE");
@@ -84,44 +82,44 @@ public class D2GambleUI extends JFrame {
 		XChartPanel<XYChart> chartPanel = createChartPanel(selected);
 		chartContainer.removeAll();
 		chartContainer.add(chartPanel, java.awt.BorderLayout.CENTER);
-		add(chartPanel, "flowx,cell 0 1 1 3");
 		chartContainer.revalidate();
 		chartContainer.repaint();
 	}
 
 	private XChartPanel<XYChart> createChartPanel(Item item) {
-		double[] xData = new double[99];
-		double[] yData = new double[99];
-		int optimalLevel = 1;
-		double bestChance = -1;
+		double[][] summary = calc.packChancesAndOptimalLevel(item);
+		XYChart chart = new XYChartBuilder().width(1000).height(800).title(item.toString() + " Gamble Chance").build();
 
-		for (int lvl = 1; lvl <= 99; lvl++) {
-			double chance = calc.calculateChanceToGamble(item.getName(), lvl, item.getRarity());
+		chart.addSeries("Chance", summary[0], summary[1]);
+		chart.getStyler().setLegendVisible(false);
+		chart.getStyler().setYAxisTicksVisible(false);
+		chart.getStyler().setCursorEnabled(true);
+		chart.getStyler().setCustomCursorXDataFormattingFunction(x -> String.format("Level %.0f", x));
+		chart.getStyler().setCustomCursorYDataFormattingFunction(y -> getCursorFormatString(y));
+		chart.getStyler().setChartBackgroundColor(BACKGROUND_COLOR);
 
-			if (chance > bestChance) {
-				bestChance = chance;
-				optimalLevel = lvl;
-			}
+		lblOptimal.setText(this.getOptimalLabelText(item, summary[2]));
 
-			xData[lvl - 1] = lvl;
-			yData[lvl - 1] = chance;
-		}
-
-		lblOptimal.setText("Optimal gamble level: " + optimalLevel);
-
-		XYChart chart = new XYChartBuilder().width(1000).height(800).title(item.toString() + " Gamble Chance")
-				.xAxisTitle("Char Level")
-				// .yAxisTitle("Chance")
-				.build();
-		chart.addSeries(item.toString(), xData, yData);
-		chart.getStyler().setToolTipsAlwaysVisible(true);
-		chart.getStyler().setToolTipFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 12));
 		return new XChartPanel<XYChart>(chart);
 	}
 
-	@Deprecated
-	private double calculateChanceToGamble(String name, int charLvl, Rarity rarity) {
-		return Math.random() * 0.25; // just for testing
+	private String getOptimalLabelText(Item item, double[] summary) {
+		double bestChance = summary[2];
+		double reverse = 1.0 / bestChance;
+		if (summary[0] == summary[1]) {
+			return String.format("Optimal level to gamble %s is clvl%.0f with a chance of %s%% (1 in %d)", item.toString(),
+					summary[0], DECIMALS.format(bestChance * 100), Math.round(reverse));
+		}
+		return String.format("Optimal level range to gamble %s is clvls%.0f-%.0f with a chance of %s%% (1 in %d)", item.toString(),
+				summary[0], summary[1], DECIMALS.format(bestChance * 100), Math.round(reverse));
+	}
+
+	private String getCursorFormatString(Double y) {
+		if (y <= 0.0) {
+			return "Impossible";
+		}
+		double reverse = 1.0 / y;
+		return DECIMALS.format(y * 100) + "% (1 in " + Math.round(reverse) + ")";
 	}
 
 	public static void main(String[] args) {
