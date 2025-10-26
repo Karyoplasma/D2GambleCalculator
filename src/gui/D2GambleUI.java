@@ -39,7 +39,7 @@ public class D2GambleUI extends JFrame {
 	public D2GambleUI(List<Item> uniqueItems, List<Item> setItems) {
 		super("D2 GambleUI");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(700, 500);
+		setSize(1000, 800);
 		getContentPane().setLayout(new MigLayout("fill, insets 10", "[grow]", "[][grow][]"));
 
 		ButtonGroup group = new ButtonGroup();

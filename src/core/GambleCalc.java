@@ -24,7 +24,7 @@ public class GambleCalc {
 		return itemDB.getItemData().uniqueItems.get(code);
 	}
 
-	public double calculateChanceToGambleCached(Item item, int ilvl, int qlvlExceptional, int qlvlElite) {
+	private double calculateChanceToGambleCached(Item item, int ilvl, int qlvlExceptional, int qlvlElite) {
 		String key = item.toString() + ":" + ilvl;
 		Double cached = chanceCache.get(key);
 		if (cached != null)
@@ -49,7 +49,7 @@ public class GambleCalc {
 		return result;
 	}
 
-	public double calculateChanceToGamble(Item item, int charLvl) {
+	private double calculateChanceToGamble(Item item, int charLvl) {
 		double sumOfProbs = 0.0;
 
 		BaseItem b = itemDB.getItemData().baseItems.get(item.getCode());
