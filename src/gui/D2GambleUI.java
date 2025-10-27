@@ -30,11 +30,9 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import javax.swing.SwingConstants;
 
 public class D2GambleUI extends JFrame {
 
@@ -119,6 +117,7 @@ public class D2GambleUI extends JFrame {
 					box.setMaximumRowCount(Math.min(20, newView.size()));
 					model.setView(newView);
 					if (!newView.isEmpty()) {
+						box.hidePopup();
 						box.showPopup();
 					} else {
 						box.hidePopup();
@@ -194,7 +193,7 @@ public class D2GambleUI extends JFrame {
 	}
 
 	private void updateChart() {
-		JComboBox<Item> activeBox = (rbUnique.isSelected()) ? cbUnique : cbSet;
+		JComboBox<Item> activeBox = rbUnique.isSelected() ? cbUnique : cbSet;
 		activeBox.hidePopup();
 		Item selected = (Item) activeBox.getSelectedItem();
 		if (selected == null)
