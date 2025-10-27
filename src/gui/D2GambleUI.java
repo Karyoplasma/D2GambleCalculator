@@ -4,10 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,16 +18,22 @@ import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent.EventType;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import core.DataBase;
 import core.GambleCalc;
 import core.Item;
+import model.ItemComboBoxModel;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JButton;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 public class D2GambleUI extends JFrame {
 
@@ -35,8 +44,8 @@ public class D2GambleUI extends JFrame {
 	private final JRadioButton rbSet = new JRadioButton("Set");
 	private final JComboBox<Item> cbUnique = new JComboBox<Item>();
 	private final JComboBox<Item> cbSet = new JComboBox<Item>();
-	private final DefaultComboBoxModel<Item> modelUnique = new DefaultComboBoxModel<Item>();
-	private final DefaultComboBoxModel<Item> modelSet = new DefaultComboBoxModel<Item>();
+	private final ItemComboBoxModel uniqueModel = new ItemComboBoxModel(DataBase.getInstance().getAllUniqueItems());
+	private final ItemComboBoxModel setModel = new ItemComboBoxModel(DataBase.getInstance().getAllSetItems());
 	private final JPanel cardsPanel = new JPanel(new CardLayout());
 	private final JLabel lblOptimal = new JLabel("Optimal level: -");
 	private final JPanel chartContainer = new JPanel(new BorderLayout());
@@ -45,7 +54,7 @@ public class D2GambleUI extends JFrame {
 	private final JTextField searchField = new JTextField();
 	private boolean isSwitching = false;
 
-	public D2GambleUI(List<Item> uniqueItems, List<Item> setItems) {
+	public D2GambleUI() {
 		super("D2 GambleUI");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(1000, 800);
@@ -56,9 +65,11 @@ public class D2GambleUI extends JFrame {
 		group.add(rbSet);
 		rbUnique.setSelected(true);
 
-		uniqueItems.forEach(modelUnique::addElement);
-		setItems.forEach(modelSet::addElement);
-		this.initComboBoxes();
+		cbUnique.setMaximumRowCount(20);
+		cbSet.setMaximumRowCount(20);
+		cbUnique.setModel(uniqueModel);
+		cbSet.setModel(setModel);
+		cbUnique.setSelectedIndex(0);
 		cardsPanel.add(cbUnique, "UNIQUE");
 		cardsPanel.add(cbSet, "SET");
 		rbUnique.addActionListener(e -> switchCard("UNIQUE"));
@@ -81,70 +92,109 @@ public class D2GambleUI extends JFrame {
 		updateChart();
 	}
 
-	private void initComboBoxes() {
-		cbUnique.setMaximumRowCount(20);
-		cbSet.setMaximumRowCount(20);
-		cbUnique.setModel(modelUnique);
-		cbSet.setModel(modelSet);
-	}
-
 	private void setupSearchBox() {
 		searchField.getDocument().addDocumentListener(new DocumentListener() {
-			private void filter() {
+			private void filter(DocumentEvent e) {
 				if (isSwitching) {
 					return;
 				}
 				final String text = searchField.getText().toLowerCase();
 				SwingUtilities.invokeLater(() -> {
 					JComboBox<Item> box = rbUnique.isSelected() ? cbUnique : cbSet;
-					List<Item> allItems = rbUnique.isSelected() ? DataBase.getInstance().getAllUniqueItems()
-							: DataBase.getInstance().getAllSetItems();
-					DefaultComboBoxModel<Item> filteredModel = new DefaultComboBoxModel<>();
-					int count = 0;
+					ItemComboBoxModel model = (ItemComboBoxModel) box.getModel();
+					List<Item> allItems = null;
+					if (e.getType() == EventType.INSERT && e.getOffset() == text.length() - 1) {
+						allItems = model.getView();
+					} else {
+						allItems = model.getOriginal();
+					}
+					List<Item> newView = new ArrayList<Item>();
 					for (Item item : allItems) {
 						if (item.toString().toLowerCase().contains(text)) {
-							filteredModel.addElement(item);
-							count++;
+							newView.add(item);
 						}
 					}
 
-					box.setModel(filteredModel);
-					box.setMaximumRowCount(Math.min(20, count));
-					box.showPopup();
+					box.setMaximumRowCount(Math.min(20, newView.size()));
+					model.setView(newView);
+					if (!newView.isEmpty()) {
+						box.showPopup();
+					} else {
+						box.hidePopup();
+					}
 				});
 			}
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				filter();
+				filter(e);
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				filter();
+				filter(e);
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				filter();
+				filter(e);
 			}
 		});
+		searchField.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+				"enterPressed");
+		searchField.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "upPressed");
+		searchField.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
+				"downPressed");
 
-		searchField.addActionListener(e -> btnCalculate.doClick());
+		searchField.getActionMap().put("enterPressed", new AbstractAction() {
+			private static final long serialVersionUID = -5314483504870624892L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				btnCalculate.doClick();
+			}
+		});
+		searchField.getActionMap().put("upPressed", new AbstractAction() {
+
+			private static final long serialVersionUID = -8997726027369310222L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JComboBox<Item> box = (rbUnique.isSelected()) ? cbUnique : cbSet;
+				((ItemComboBoxModel) box.getModel()).selectPreviousItem();
+			}
+		});
+		searchField.getActionMap().put("downPressed", new AbstractAction() {
+			private static final long serialVersionUID = 5445050628155017232L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JComboBox<Item> box = (rbUnique.isSelected()) ? cbUnique : cbSet;
+				((ItemComboBoxModel) box.getModel()).selectNextItem();
+			}
+		});
 	}
 
 	private void switchCard(String cardName) {
 		isSwitching = true;
-		initComboBoxes();
+		if (rbUnique.isSelected()) {
+			cbUnique.setMaximumRowCount(20);
+			uniqueModel.resetView();
+		} else {
+			cbSet.setMaximumRowCount(20);
+			setModel.resetView();
+		}
 		searchField.setText("");
-		isSwitching = false;
 
 		CardLayout cl = (CardLayout) (cardsPanel.getLayout());
 		cl.show(cardsPanel, cardName);
+		searchField.requestFocus();
+		isSwitching = false;
 	}
 
 	private void updateChart() {
 		JComboBox<Item> activeBox = (rbUnique.isSelected()) ? cbUnique : cbSet;
+		activeBox.hidePopup();
 		Item selected = (Item) activeBox.getSelectedItem();
 		if (selected == null)
 			return;
@@ -193,11 +243,8 @@ public class D2GambleUI extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		List<Item> uniqueItems = DataBase.getInstance().getAllUniqueItems();
-		List<Item> setItems = DataBase.getInstance().getAllSetItems();
-
 		SwingUtilities.invokeLater(() -> {
-			D2GambleUI gui = new D2GambleUI(uniqueItems, setItems);
+			D2GambleUI gui = new D2GambleUI();
 			gui.setVisible(true);
 		});
 	}
