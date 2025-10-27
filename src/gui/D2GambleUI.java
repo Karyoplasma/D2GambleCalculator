@@ -6,12 +6,15 @@ import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.List;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -20,6 +23,8 @@ import core.GambleCalc;
 import core.Item;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JButton;
+import javax.swing.JTextField;
+import java.awt.Font;
 
 public class D2GambleUI extends JFrame {
 
@@ -28,13 +33,17 @@ public class D2GambleUI extends JFrame {
 	private static final DecimalFormat DECIMALS = new DecimalFormat("#.#####");
 	private final JRadioButton rbUnique = new JRadioButton("Unique");
 	private final JRadioButton rbSet = new JRadioButton("Set");
-	private final JComboBox<Item> cbUnique = new JComboBox<>();
-	private final JComboBox<Item> cbSet = new JComboBox<>();
+	private final JComboBox<Item> cbUnique = new JComboBox<Item>();
+	private final JComboBox<Item> cbSet = new JComboBox<Item>();
+	private final DefaultComboBoxModel<Item> modelUnique = new DefaultComboBoxModel<Item>();
+	private final DefaultComboBoxModel<Item> modelSet = new DefaultComboBoxModel<Item>();
 	private final JPanel cardsPanel = new JPanel(new CardLayout());
 	private final JLabel lblOptimal = new JLabel("Optimal level: -");
 	private final JPanel chartContainer = new JPanel(new BorderLayout());
 	private final JButton btnCalculate = new JButton("Calculate");
 	private final GambleCalc calc = new GambleCalc();
+	private final JTextField searchField = new JTextField();
+	private boolean isSwitching = false;
 
 	public D2GambleUI(List<Item> uniqueItems, List<Item> setItems) {
 		super("D2 GambleUI");
@@ -47,19 +56,23 @@ public class D2GambleUI extends JFrame {
 		group.add(rbSet);
 		rbUnique.setSelected(true);
 
-		uniqueItems.forEach(cbUnique::addItem);
-		setItems.forEach(cbSet::addItem);
+		uniqueItems.forEach(modelUnique::addElement);
+		setItems.forEach(modelSet::addElement);
+		this.initComboBoxes();
 		cardsPanel.add(cbUnique, "UNIQUE");
 		cardsPanel.add(cbSet, "SET");
 		rbUnique.addActionListener(e -> switchCard("UNIQUE"));
 		rbSet.addActionListener(e -> switchCard("SET"));
-
-		JPanel controlPanel = new JPanel(new MigLayout("", "[]5[]5[grow,fill]5[]", "[]"));
+		searchField.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		searchField.setColumns(10);
+		this.setupSearchBox();
+		JPanel controlPanel = new JPanel(new MigLayout("", "[]5[]5[250px,grow,fill]5[grow,fill]5[]", "[]"));
 		controlPanel.add(rbUnique, "cell 0 0");
 		controlPanel.add(rbSet, "cell 1 0");
 		getContentPane().add(controlPanel, "grow,wrap");
 		controlPanel.add(cardsPanel, "cell 2 0,growy");
-		controlPanel.add(btnCalculate, "cell 3 0");
+		controlPanel.add(searchField, "cell 3 0,grow");
+		controlPanel.add(btnCalculate, "cell 4 0");
 		btnCalculate.addActionListener(e -> updateChart());
 
 		getContentPane().add(chartContainer, "grow, wrap");
@@ -68,7 +81,64 @@ public class D2GambleUI extends JFrame {
 		updateChart();
 	}
 
+	private void initComboBoxes() {
+		cbUnique.setMaximumRowCount(20);
+		cbSet.setMaximumRowCount(20);
+		cbUnique.setModel(modelUnique);
+		cbSet.setModel(modelSet);
+	}
+
+	private void setupSearchBox() {
+		searchField.getDocument().addDocumentListener(new DocumentListener() {
+			private void filter() {
+				if (isSwitching) {
+					return;
+				}
+				final String text = searchField.getText().toLowerCase();
+				SwingUtilities.invokeLater(() -> {
+					JComboBox<Item> box = rbUnique.isSelected() ? cbUnique : cbSet;
+					List<Item> allItems = rbUnique.isSelected() ? DataBase.getInstance().getAllUniqueItems()
+							: DataBase.getInstance().getAllSetItems();
+					DefaultComboBoxModel<Item> filteredModel = new DefaultComboBoxModel<>();
+					int count = 0;
+					for (Item item : allItems) {
+						if (item.toString().toLowerCase().contains(text)) {
+							filteredModel.addElement(item);
+							count++;
+						}
+					}
+
+					box.setModel(filteredModel);
+					box.setMaximumRowCount(Math.min(20, count));
+					box.showPopup();
+				});
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				filter();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				filter();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				filter();
+			}
+		});
+
+		searchField.addActionListener(e -> btnCalculate.doClick());
+	}
+
 	private void switchCard(String cardName) {
+		isSwitching = true;
+		initComboBoxes();
+		searchField.setText("");
+		isSwitching = false;
+
 		CardLayout cl = (CardLayout) (cardsPanel.getLayout());
 		cl.show(cardsPanel, cardName);
 	}
