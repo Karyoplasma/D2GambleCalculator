@@ -12,6 +12,64 @@ import enums.Quality;
 import enums.Rarity;
 
 public class TxtFileReader {
+	private static final Map<String, String> NAME_FIXES = new HashMap<>();
+
+	static {
+		NAME_FIXES.put("Fechmars Axe", "Axe of Fechmar");
+		NAME_FIXES.put("The Chieftan", "The Chieftain");
+		NAME_FIXES.put("Iros Torch", "Iro's Torch");
+		NAME_FIXES.put("Maelstromwrath", "Maelstrom");
+		NAME_FIXES.put("Umes Lament", "Ume's Lament");
+		NAME_FIXES.put("Rixots Keen", "Rixot's Keen");
+		NAME_FIXES.put("The Atlantian", "The Atlantean");
+		NAME_FIXES.put("The Generals Tan Do Li Ga", "The General's Tan Do Li Ga");
+		NAME_FIXES.put("Blinkbats Form", "Blinkbat's Form");
+		NAME_FIXES.put("Verdugo's Hearty Cord", "Verdungo's Hearty Cord");
+		NAME_FIXES.put("Victors Silk", "Silks of the Victor");
+		NAME_FIXES.put("Wartraveler", "War Traveler");
+		NAME_FIXES.put("Venomsward", "Venom Ward");
+		NAME_FIXES.put("Thudergod's Vigor", "Thundergod's Vigor");
+		NAME_FIXES.put("Bul Katho's Wedding Band", "Bul-Kathos' Wedding Band");
+		NAME_FIXES.put("Culvens Point", "Culven's Point");
+		NAME_FIXES.put("Doomspittle", "Doomslinger");
+		NAME_FIXES.put("War Bonnet", "Biggin's Bonnet");
+		NAME_FIXES.put("Griswolds Edge", "Griswold's Edge");
+		NAME_FIXES.put("Kinemils Awl", "Kinemil's Awl");
+		NAME_FIXES.put("Lenyms Cord", "Lenymo");
+		NAME_FIXES.put("Mindrend", "Skull Splitter");
+		NAME_FIXES.put("Mosers Blessed Circle", "Moser's Blessed Circle");
+		NAME_FIXES.put("Djinnslayer", "Djinn Slayer");
+		NAME_FIXES.put("Bonesob", "Bonesnap");
+		NAME_FIXES.put("Wisp", "Wisp Projector");
+		NAME_FIXES.put("Deaths's Web", "Death's Web");
+		NAME_FIXES.put("Cerebus", "Cerebus' Bite");
+		NAME_FIXES.put("Cutthroat1", "Bartuc's Cut-Throat");
+		NAME_FIXES.put("Kerke's Sanctuary", "Gerke's Sanctuary");
+		NAME_FIXES.put("Radimant's Sphere", "Radament's Sphere");
+		NAME_FIXES.put("Skin of the Flayerd One", "Skin of the Flayed One");
+		NAME_FIXES.put("Valkiry Wing", "Valkyrie Wing");
+		NAME_FIXES.put("Peasent Crown", "Peasant Crown");
+		NAME_FIXES.put("Pus Spiter", "Pus Spitter");
+		NAME_FIXES.put("Que-Hegan's Wisdon", "Que-Hegan's Wisdom");
+		NAME_FIXES.put("Steel Carapice", "Steel Carapace");
+		NAME_FIXES.put("Steelpillar", "Steel Pillar");
+		NAME_FIXES.put("Steelshade", "Steel Shade");
+		NAME_FIXES.put("Whichwild String", "Witchwild String");
+		NAME_FIXES.put("The Minataur", "The Minotaur");
+		NAME_FIXES.put("Pompe's Wrath", "Pompeii's Wrath");
+		NAME_FIXES.put("Piercerib", "Rogue's Bow");
+		NAME_FIXES.put("Pullspite", "Stormstrike");
+		NAME_FIXES.put("Rimeraven", "Raven Claw");
+		NAME_FIXES.put("Irices Shard", "Spectral Shard");
+		NAME_FIXES.put("Krintizs Skewer", "Skewer of Krintiz");
+		NAME_FIXES.put("Spiritual Custodian", "Dark Adherent");
+		NAME_FIXES.put("Heaven's Taebaek", "Taebaek's Glory");
+		NAME_FIXES.put("Deaths's Web", "Death's Web");
+		NAME_FIXES.put("Wihtstan's Guard", "Whitstan's Guard");
+		NAME_FIXES.put("McAuley's Paragon", "Sander's Paragon");
+		NAME_FIXES.put("McAuley's Riprap", "Sander's Riprap");
+		NAME_FIXES.put("McAuley's Taboo", "Sander's Taboo");
+	}
 
 	private TxtFileReader() {
 	}
@@ -76,8 +134,8 @@ public class TxtFileReader {
 			if (!gambleItems.contains(baseItem.getCode())) {
 				return;
 			}
-			Item item = new Item(parts[0], parts[2], Rarity.SET, Integer.parseInt(parts[4]), Integer.parseInt(parts[5]),
-					baseItem.getQuality());
+			Item item = new Item(NAME_FIXES.getOrDefault(parts[0], parts[0]), parts[2], Rarity.SET,
+					Integer.parseInt(parts[4]), Integer.parseInt(parts[5]), baseItem.getQuality());
 			ret.computeIfAbsent(parts[2], k -> new HashSet<>()).add(item);
 		});
 
@@ -94,8 +152,8 @@ public class TxtFileReader {
 			}
 			BaseItem baseItem = baseItems.get(parts[8]);
 			if (baseItem != null && gambleItems.contains(baseItem.getCode())) {
-				Item item = new Item(parts[0], parts[8], Rarity.UNIQUE, Integer.parseInt(parts[4]),
-						Integer.parseInt(parts[6]), baseItem.getQuality());
+				Item item = new Item(NAME_FIXES.getOrDefault(parts[0], parts[0]), parts[8], Rarity.UNIQUE,
+						Integer.parseInt(parts[4]), Integer.parseInt(parts[6]), baseItem.getQuality());
 				ret.computeIfAbsent(parts[8], k -> new HashSet<>()).add(item);
 			}
 		});

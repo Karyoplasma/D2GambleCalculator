@@ -107,11 +107,11 @@ public class D2GambleUI extends JFrame {
 		double bestChance = summary[2];
 		double reverse = 1.0 / bestChance;
 		if (summary[0] == summary[1]) {
-			return String.format("Optimal level to gamble %s is clvl%.0f with a chance of %s%% (1 in %d)", item.toString(),
-					summary[0], DECIMALS.format(bestChance * 100), Math.round(reverse));
+			return String.format("Optimal level to gamble %s is clvl%.0f with a chance of %s%% (1 in %d)",
+					item.toString(), summary[0], DECIMALS.format(bestChance * 100), Math.round(reverse));
 		}
-		return String.format("Optimal level range to gamble %s is clvls%.0f-%.0f with a chance of %s%% (1 in %d)", item.toString(),
-				summary[0], summary[1], DECIMALS.format(bestChance * 100), Math.round(reverse));
+		return String.format("Optimal level range to gamble %s is clvls%.0f-%.0f with a chance of %s%% (1 in %d)",
+				item.toString(), summary[0], summary[1], DECIMALS.format(bestChance * 100), Math.round(reverse));
 	}
 
 	private String getCursorFormatString(Double y) {

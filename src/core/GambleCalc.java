@@ -43,7 +43,6 @@ public class GambleCalc {
 			upgradeChance = this.calculateUpgradeChanceAtIlvl(qlvlExceptional, qlvlElite, ilvl, item.getQuality());
 		}
 		double result = rarityFactor * upgradeChance * ((item.getRarity() == Rarity.UNIQUE) ? 0.0005 : 0.001);
-		;
 		chanceCache.put(key, result);
 
 		return result;
@@ -97,32 +96,6 @@ public class GambleCalc {
 		return result;
 	}
 
-//	public double[] findOptimalGambleRange(String name, int charLvl, Rarity rarity) {
-//		Map<Double, Set<Integer>> results = new HashMap<Double, Set<Integer>>();
-//		Item item;
-//		if (rarity == Rarity.SET) {
-//			item = itemDB.getSetItemByName(name);
-//		} else {
-//			item = itemDB.getUniqueItemByName(name);
-//		}
-//		double previous = 0.0;
-//		for (int i = item.getQlvl() - 4; i<=99; i++) {
-//			double chance = calculateChanceToGamble(name, i, rarity);
-//			if (chance < previous) {
-//				break;
-//			}
-//	        results.computeIfAbsent(chance, k -> new HashSet<>()).add(i);
-//			previous = chance;
-//		}
-//		double[] ret = new double[3];
-//		ret[0] = Collections.min(results.get(previous));
-//		ret[1] = Collections.max(results.get(previous));
-//		ret[2] = 1.0 / previous;
-//		System.out.println("DEBUG: " + results.get(previous).toString());
-//		return ret;
-//		
-//	}
-
 	private double getRarityFactorAtIlvl(Item item, int ilvl) {
 		if (item.getQlvl() > ilvl) {
 			return 0.0;
@@ -142,10 +115,10 @@ public class GambleCalc {
 			if (i.getQlvl() > ilvl) {
 				continue;
 			}
-			rarityTotal += i.getRare();
+			rarityTotal += i.getRarityFactor();
 		}
 
-		return (item.getRare() * 1.0d) / (rarityTotal * 1.0d);
+		return (item.getRarityFactor() * 1.0d) / (rarityTotal * 1.0d);
 	}
 
 	private double calculateUpgradeChanceAtIlvl(int qlvlExceptional, int qlvlElite, int ilvl, Quality quality) {

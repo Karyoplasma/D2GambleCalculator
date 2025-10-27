@@ -22,15 +22,13 @@ public class DataBase {
 		uniqueItemByName = new HashMap<String, Item>();
 		for (Set<Item> items : itemData.uniqueItems.values()) {
 			for (Item item : items) {
-				item.fixUniqueName();
-				uniqueItemByName.put(item.getName(), item);
+				uniqueItemByName.put(item.toString(), item);
 			}
 		}
 		setItemByName = new HashMap<String, Item>();
 		for (Set<Item> items : itemData.setItems.values()) {
 			for (Item item : items) {
-				item.fixSetName();
-				setItemByName.put(item.getName(), item);
+				setItemByName.put(item.toString(), item);
 			}
 		}
 	}
