@@ -34,6 +34,7 @@ import javax.swing.KeyStroke;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.SwingConstants;
 
 public class D2GambleUI extends JFrame {
 
@@ -85,10 +86,10 @@ public class D2GambleUI extends JFrame {
 		controlPanel.add(searchField, "cell 3 0,grow");
 		controlPanel.add(btnCalculate, "cell 4 0");
 		btnCalculate.addActionListener(e -> updateChart());
+		lblOptimal.setFont(new Font("Tahoma", Font.BOLD, 14));
 
 		getContentPane().add(chartContainer, "grow, wrap");
-
-		getContentPane().add(lblOptimal, "cell 0 3 1 3");
+		getContentPane().add(lblOptimal, "cell 0 3 1 3,alignx center");
 		updateChart();
 	}
 
@@ -230,7 +231,7 @@ public class D2GambleUI extends JFrame {
 			return String.format("Optimal level to gamble %s is clvl%.0f with a chance of %s%% (1 in %d)",
 					item.toString(), summary[0], DECIMALS.format(bestChance * 100), Math.round(reverse));
 		}
-		return String.format("Optimal level range to gamble %s is clvls%.0f-%.0f with a chance of %s%% (1 in %d)",
+		return String.format("Optimal level range to gamble %s is clvl%.0f to clvl%.0f with a chance of %s%% (1 in %d)",
 				item.toString(), summary[0], summary[1], DECIMALS.format(bestChance * 100), Math.round(reverse));
 	}
 
