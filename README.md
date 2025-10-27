@@ -17,6 +17,10 @@ The following files must be in the resources/ folder:
 
 **The names are case-sensitive.**
 
+## Preview
+
+![Preview of my program](preview/preview.png)
+
 ## Dependencies
 
 [XChart](https://github.com/knowm/XChart/blob/master/README.md) - licensed under [Apache License 2.0](https://github.com/knowm/XChart/blob/master/LICENSE)
