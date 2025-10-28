@@ -69,6 +69,9 @@ public class TxtFileReader {
 		NAME_FIXES.put("McAuley's Paragon", "Sander's Paragon");
 		NAME_FIXES.put("McAuley's Riprap", "Sander's Riprap");
 		NAME_FIXES.put("McAuley's Taboo", "Sander's Taboo");
+		NAME_FIXES.put("Aldur's Gauntlet", "Aldur's Rhythm");
+		NAME_FIXES.put("Hwanin's Seal", "Hwanin's Blessing");
+		NAME_FIXES.put("Tal Rasha's Howling Wind", "Tal Rasha's Guardianship");
 	}
 
 	private TxtFileReader() {

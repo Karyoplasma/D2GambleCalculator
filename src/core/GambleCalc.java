@@ -68,7 +68,6 @@ public class GambleCalc {
 		double[] summary = new double[3];
 		double bestChance = 0.0;
 		List<Integer> bestLevels = new ArrayList<Integer>();
-
 		for (int lvl = 1; lvl <= 99; lvl++) {
 			double chance = calculateChanceToGamble(item, lvl);
 
