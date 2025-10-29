@@ -113,14 +113,11 @@ public class D2GambleUI extends JFrame {
 							newView.add(item);
 						}
 					}
-
+					box.hidePopup();
 					box.setMaximumRowCount(Math.min(20, newView.size()));
 					model.setView(newView);
 					if (!newView.isEmpty()) {
-						box.hidePopup();
 						box.showPopup();
-					} else {
-						box.hidePopup();
 					}
 				});
 			}
@@ -160,7 +157,7 @@ public class D2GambleUI extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JComboBox<Item> box = (rbUnique.isSelected()) ? cbUnique : cbSet;
+				JComboBox<Item> box = rbUnique.isSelected() ? cbUnique : cbSet;
 				((ItemComboBoxModel) box.getModel()).selectPreviousItem();
 			}
 		});
@@ -169,7 +166,7 @@ public class D2GambleUI extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JComboBox<Item> box = (rbUnique.isSelected()) ? cbUnique : cbSet;
+				JComboBox<Item> box = rbUnique.isSelected() ? cbUnique : cbSet;
 				((ItemComboBoxModel) box.getModel()).selectNextItem();
 			}
 		});
@@ -210,7 +207,7 @@ public class D2GambleUI extends JFrame {
 		double[][] summary = calc.packChancesAndOptimalLevel(item);
 		XYChart chart = new XYChartBuilder().width(1000).height(800).title(item.toString() + " Gamble Chance").build();
 
-		chart.addSeries("Chance", summary[0], summary[1]);
+		chart.addSeries(item.toString(), summary[0], summary[1]);
 		chart.getStyler().setLegendVisible(false);
 		chart.getStyler().setYAxisTicksVisible(false);
 		chart.getStyler().setCursorEnabled(true);
